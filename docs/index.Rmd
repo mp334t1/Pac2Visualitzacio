@@ -1,0 +1,203 @@
+---
+title: "Pac 2: Estudi de tècniques de visualització de dades"
+author: "Dario Cabrera Gurillo"
+date: '2022-11-13'
+output:
+  html_document:
+    highlight: default
+    number_sections: yes
+    theme: cosmo
+    toc: yes
+    toc_depth: 2
+    includes:
+      in_header: 05.584-PAC-header.html
+  word_document: default
+  pdf_document:
+    highlight: zenburn
+    toc: yes
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dpi=100, warning = FALSE, fig.align = "center")
+```
+
+Mostrem tots aquells paquets que poden ser necessaris per a la realització de les diferents gràfiques:
+
+```{R message=FALSE, warning=FALSE}
+if (!require('dplyr')) install.packages('dplyr'); library('dplyr')
+if (!require('nortest')) install.packages('nortest'); library('nortest')
+if (!require("spiralize")) install.packages("spiralize"); library("spiralize")
+if (!require("readr")) install.packages("readr"); library("readr")
+if (!require("ggplot2")) install.packages("ggplot2"); library("ggplot2")
+if (!require("highcharter")) install.packages("highcharter"); library("highcharter")
+if (!require("tidyverse")) install.packages("tidyverse"); library("tidyverse")
+```
+
+# Pyramid charts
+
+En primer lloc anem a veure el funcionament de les grafiques *pyramid charts*, aquestes grafiques tenen forma de triangle que serveixen, principalment, per a mostrar jerarquies entre el atribut estudiat. Aquest grafic esta dividit en seccions on la base (la zona en mes area) representa la majoria, i les altres seccions van disminuint, vienet com evoluciona de la principal caracteristica de l'atribut fins a la menor.
+
+Les dades que s'empren per a la creacio d'aquestes visualitzacions solen ser dades qualitatives, 
+
+Alguns exemples d'aquestes grafiques son: la piramide alimenticia que coneguem tot el mon, creades a partir del 1970. Tambe tenim la pramide de maslow, on representa les necesitats humanes que s'han de cobrir, creada al 1943.
+
+
+Aquest tipus de visualitzacio tenen certs avantatges alhora de mostrar la informacio al client, ja que son molt simples i facils d'entendre (la base es el que mes abunda, i la punta el mes extrany), a més tenim una visualitzavio de la jerarquia que analitzem.
+
+Alguns desavantatges mostrats en les grafiques es que no poden ser emprats per gran conjunts de dades molt desglosats, ja que partiriem masa la piramide y no tindriem una visualitzacio coherent, a banda, si un grafic no esta ben creat, pot tenir confusio. Si un grafic no te les altures estandaritzades, podem enganyar al visualitzador (ja que l'area de la base i del segon pis estaran alternades), ja que l'amplada ens mostra la jerarquia, mentres que l'alçada la influencia.
+
+En aquesta seccio farem la pyramid charts:
+- https://www.tibco.com/reference-center/what-is-a-pyramid-chart#:~:text=A%20pyramid%20chart%20is%20a,divided%20up%20into%20horizontal%20sections.
+- https://www.kaggle.com/datasets/stetsondone/video-game-sales-by-genre
+- https://www.youtube.com/watch?v=cHYCw9HulTk&ab_channel=TechAnswers88
+
+```{r Lectura1}
+Games <- read.csv("Videojuegos.csv")
+GamesEU <- Games %>% filter(region == "European Union")
+GamesEU <- GamesEU[order(GamesEU$sales, decreasing = TRUE),]
+```
+
+````{R Grafica 1, fig.width=8, fig.height = 5}
+hc <- GamesEU %>% hchart("pyramid", hcaes(x = genre ,y = sales)) %>%
+    hc_title(text = "Generes de videojocs mes venuts en la Unio Europea") %>%
+    hc_subtitle(text = "Vendes de videojocs entre els anys 1980-2020") %>%
+    hc_add_theme(hc_theme_ggplot2()) %>%
+    hc_subtitle(style = list(fontSize = "10px", color = 'red')) %>%
+    hc_legend(style = list(fontSize = "8px", color = 'red')) %>%
+    hc_caption(style = list(fontSize = "8px", color = 'red'))
+hc
+````
+
+Per a la creacio d'aquesta visualitzacio hem agafat una base de dades que ens diu les vendes del 1980 fins al 2020, desglosades per regio (Europa, America, Asia). En el nostre cas, ens concentrarem en Europa.
+
+Com veiem en aquesta visualitzacio, tenim en un cop d'ull els generes de videojocs mes venuts, com veiem, el mes venut son els d'accio, seguir per els esportius, i aixi succesivament fins a arribar a els estrategics. Pero el problema que observem es que tenim massa caracteristiques incorporades en aquest diagrama, per a tindre una millor visualitzavio deuriem de agafar solament les 5 caracteristiques mes venudes.
+
+
+En el nostre cas, estem emprant dades quantitatives per a representar les dades, que son les millons de jocs venuts en la regio d'europa, pero aquestes dades van asociades a la qualitat del producte (el genere asociat), per tant, aquest tipus de grafics solen emprar dades qualitatves, dades que representen una caracteristica a analitzar.
+
+
+
+
+# Dot matrix plot
+
+En segon lloc veurem les matrius de punts (*dot matrix plot*), la configuracio d'aquesta visualitzacio correspon a una matriu $mxn$ on cada punt representa l'opinio elegtida. Aquest conjunt de dades empra dades qualitatives, ja que cada punt es una qualitat que volem analitzar. 
+
+Un clar exemple emprat per aquesta visualitzacio, encara que no es una matriu estandard, es la visualitzacio de la camara de congresos o diputat que veiem en cada eleccio, on els punts son els seients, i cada color representa a la categoria que ocupa aquest seient.
+
+
+
+En aquesta seccio farem dot matrix plot
+- https://gonzalezgouveia.com/como-hacer-matrices-en-r-studio/
+- https://rpubs.com/lgadar/matrix-visualizations
+- https://www.cortsvalencianes.es/ca-va/composicio/resultats/dades-electorals-eleccions-autonomiques-2019
+
+
+
+Com no hem pogut realitzar correctament la visualitzacio en R, ja que era molt especifica, s'ha realitzat en el seguent enllaç:
+- https://public.flourish.studio/visualisation/11917557/
+
+<div class="flourish-embed" data-src="visualisation/11917557"><script src="https://public.flourish.studio/resources/embed.js"></script></div>
+
+
+En aquest cas, hem creat un conjunt de dades que arreplega l'historic de la camara de les corts valencianes, on cada matriu esta separada per any, i podem observar com es distribueix aquesta camara al llarg del temps.
+
+# Spiral Plot
+
+En aquesta seccio farem la espiral, links:
+- https://jokergoo.github.io/spiralize_vignettes/spiralize.html
+- https://flowingdata.com/2022/01/10/a-quick-and-easy-way-to-make-spiral-charts-in-r/
+- https://estadisticamente.com/trabajando-con-fechas-en-r/
+- https://es.investing.com/indices/spain-35-historical-data
+
+```{r Lectura3}
+Ibex <- read.csv("IBEX35.csv")
+names (Ibex) = c("Data", "Cierre", "Apertura", "Maximo", "Minimo", "Volumen", "Var")
+Ibex$Data <- as.Date(Ibex$Data, format="%d.%m.%Y")
+Grup <- Ibex %>% mutate(Any = Data) %>% 
+                        group_by(Data) %>% 
+                        summarise(Maximo, Minimo)
+Grup$Maximo <- gsub("\\." , "", Grup$Maximo)
+Grup$Maximo <- gsub("," , ".", Grup$Maximo)
+Grup$Maximo <- as.numeric(Grup$Maximo)
+
+Grup$Minimo <- gsub("\\." , "", Grup$Minimo)
+Grup$Minimo <- gsub("," , ".", Grup$Minimo)
+Grup$Minimo <- as.numeric(Grup$Minimo)
+Grup$Diff <- Grup$Maximo - Grup$Minimo
+Grup$dia <- 1:length(Grup$Data)
+```
+
+Una vegada arreglades les dades, ens disposem a crear la visualitzacio en espiral, en el nostre cas hem emprat una visualitzacio en poligon, per veure millor les diferencies mes notabes.
+
+`````{R Grafica 3.1}
+spiral_initialize_by_time(xlim=c(min(Grup$Data), max(Grup$Data)),
+                          unit_on_axis = "days", period="years", start=90, end=(709/365)*360+(28/365)*360+90,
+                          flip="horizontal",  normalize_year = TRUE)
+
+spiral_track(ylim=c(0, max(Grup$Diff)*.7),
+             background=FALSE, background_gp = gpar(col = NA, fill = NA))
+
+spiral_polygon(x=c(Grup$Data, rev(Grup$Data)),
+               y=c(Grup$Diff/2, -rev(Grup$Diff/2)),
+               gp = gpar(col="#d32e2b", fill="#d32e2b50"))
+
+spiral_lines(x=Grup$Data, y=0)
+
+spiral_text(x=min(Grup$Data), y=250, text="2018",
+            facing = "curved_inside", just = "right",
+            gp=gpar(cex=1, fontfamily="Courier"))
+
+spiral_text(x="2019-01-01", y=250, text="2019",
+            facing = "curved_inside", just = "right",
+            gp=gpar(cex=1, fontfamily="Courier"))
+
+spiral_text(x="2020-01-01", y=250, text="2020",
+            facing = "curved_inside", just = "right",
+            gp=gpar(cex=1, fontfamily="Courier"))
+
+spiral_text(x="2021-01-01", y=250, text="2021",
+            facing = "curved_inside", just = "right",
+            gp=gpar(cex=1, fontfamily="Courier"))
+spiral_text(x="2022-01-01", y=250, text="2022",
+            facing = "curved_inside", just = "right",
+            gp=gpar(cex=1, fontfamily="Courier"))
+
+spiral_text(x="2021-01-01", y=1300, text="Gener",
+            facing = "curved_inside", just = "right",
+            gp=gpar(cex=1, fontfamily="Courier"))
+spiral_text(x="2021-02-01", y=1300, text="Febrer",
+            facing = "curved_inside", just = "right",
+            gp=gpar(cex=1, fontfamily="Courier"))
+spiral_text(x="2021-03-01", y=1300, text="Març",
+            facing = "curved_inside", just = "right",
+            gp=gpar(cex=1, fontfamily="Courier"))
+spiral_text(x="2021-04-01", y=1300, text="Abril",
+            facing = "curved_inside", just = "right",
+            gp=gpar(cex=1, fontfamily="Courier"))
+spiral_text(x="2021-05-01", y=1300, text="Maig",
+            facing = "curved_inside", just = "right",
+            gp=gpar(cex=1, fontfamily="Courier"))
+spiral_text(x="2021-06-01", y=1300, text="Juny",
+            facing = "curved_inside", just = "right",
+            gp=gpar(cex=1, fontfamily="Courier"))
+spiral_text(x="2021-07-01", y=1300, text="Juliol",
+            facing = "curved_inside", just = "right",
+            gp=gpar(cex=1, fontfamily="Courier"))
+spiral_text(x="2021-08-01", y=1300, text="Agost",
+            facing = "curved_inside", just = "right",
+            gp=gpar(cex=1, fontfamily="Courier"))
+spiral_text(x="2021-09-01", y=1300, text="Septembre",
+            facing = "curved_inside", just = "right",
+            gp=gpar(cex=1, fontfamily="Courier"))
+spiral_text(x="2021-10-01", y=1300, text="Octubre",
+            facing = "curved_inside", just = "right",
+            gp=gpar(cex=1, fontfamily="Courier"))
+spiral_text(x="2021-11-01", y=1300, text="Novembre",
+            facing = "curved_inside", just = "right",
+            gp=gpar(cex=1, fontfamily="Courier"))
+spiral_text(x="2021-12-01", y=1300, text="Decembre",
+            facing = "curved_inside", just = "right",
+            gp=gpar(cex=1, fontfamily="Courier"))
+
+````
+
+En aquesta visualitzacio estem veient l'evolucio del IBEX 35 al llarg de diversos anys.
